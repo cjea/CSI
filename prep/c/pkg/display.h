@@ -5,7 +5,7 @@
 struct stat get_stats(char* path);
 void display_dir(struct dirent *d);
 
-char dir_char(mode_t m);
+char* dir_char(mode_t m);
 char* owner_perms(mode_t m);
 char* other_perms(mode_t m);
 char* g_perms(mode_t m);

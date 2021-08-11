@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <grp.h>
 #include <pwd.h>
+#include <string.h>
 #include "display.h"
 
 char perms[8][4] = {
@@ -15,9 +16,12 @@ char perms[8][4] = {
 	{'r', 'w', 'x', '\0'},
 };
 
-char dir_char(mode_t m) {
-	if (S_ISDIR(m)) return 'd';
-	return '-';
+char* dir_char(mode_t m) {
+	char* d = malloc(sizeof(char) * 2);
+	if (S_ISDIR(m)) *d = 'd';
+	else *d = '-';
+	*(d+1) = '\0';
+	return d;
 }
 
 char* owner_perms(mode_t m) {
@@ -56,7 +60,7 @@ void display_dir(struct dirent *d) {
 	struct stat st = get_stats(d->d_name);
 	mode_t m = st.st_mode;
 	printf(
-		"%c%s%s%s\t%s\t%s\t%dB\t%s\n",
+		"%s%s%s%s\t%s\t%s\t%dB\t%s\n",
 		dir_char(m), owner_perms(m), g_perms(m), other_perms(m),
 		username(st), groupname(st), st.st_size,
 		d->d_name
