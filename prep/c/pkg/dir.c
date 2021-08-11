@@ -1,7 +1,7 @@
 #include <dirent.h>
 #include <errno.h>
 
-typedef void (*dir_doer)(struct dirent*);
+typedef void (*dir_doer)(char*, struct dirent*);
 
 void fail(char* msg) {
 	printf("%s\n", msg);
@@ -24,7 +24,7 @@ int each_dir(char* path, dir_doer fptr) {
 			closedir(dirp);
 			fail("something went wrong");
 		} else if (dp)  {
-			fptr(dp);
+			fptr(path, dp);
 			continue;
 		} else {
 			closedir(dirp);

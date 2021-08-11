@@ -5,6 +5,11 @@
 #include <string.h>
 #include "display.h"
 
+void fail(char* msg) {
+	printf("%s\n", msg);
+	exit(1);
+}
+
 char perms[8][4] = {
 	{'-', '-', '-', '\0'},
 	{'-', '-', 'x', '\0'},
@@ -53,11 +58,17 @@ char* username(struct stat st) {
 struct stat get_stats(char* path) {
 	struct stat path_stat;
 	stat(path, &path_stat);
+	if (errno > 0) fail("unexpected error getting stats\n");
+
 	return path_stat;
 }
 
-void display_dir(struct dirent *d) {
-	struct stat st = get_stats(d->d_name);
+void display_dir(char *basePath, struct dirent *d) {
+	char* fullPath = (char*)malloc(strlen(basePath) + strlen(d->d_name) + 1);
+	if (fullPath == NULL) fail("unexpected error\n");
+
+	sprintf(fullPath, "%s/%s", basePath, d->d_name);
+	struct stat st = get_stats(fullPath);
 	mode_t m = st.st_mode;
 	printf(
 		"%s%s%s%s\t%s\t%s\t%dB\t%s\n",
@@ -65,4 +76,5 @@ void display_dir(struct dirent *d) {
 		username(st), groupname(st), st.st_size,
 		d->d_name
 	);
+	free(fullPath);
 }

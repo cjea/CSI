@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 
 struct stat get_stats(char* path);
-void display_dir(struct dirent *d);
+void display_dir(char *basePath, struct dirent *d);
 
 char* dir_char(mode_t m);
 char* owner_perms(mode_t m);
