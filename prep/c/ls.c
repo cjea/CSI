@@ -1,30 +1,42 @@
+#include "pkg/cols.c"
+#include "pkg/formatter.c"
+#include "pkg/immutable_str.c"
+#include "pkg/read_dir.c"
+#include <dirent.h>
+#include <errno.h>
+#include <grp.h>
+#include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
-char* add_strings(const char* s1, const char* s2) {
-	char* ret = (char*) malloc(strlen(s1) + strlen(s2) + 1);
-	char* tmp = ret;
-	const char* first = s1;
-	const char* second = s2;
-	while(*first != '\0') {
-		*tmp++ = *first++;
-	}
-	while(*second != '\0') {
-		*tmp++ = *second++;
-	}
-	*tmp = '\0';
-	return ret;
-}
+#define NUM_COLUMNS 4
 
 int main(int argc, char *argv[]) {
-	char* path;
-	if (argc == 1) {
-		path = ".";
-	} else {
-		path = argv[1];
-	}
-	char* concatted = add_strings("Hey! ", add_strings("sup, ", "dude!"));
-	printf("%s\n", path);
-	printf("%s\n", concatted);
+  char *dir_name = argv[1];
+  if (dir_name[strlen(dir_name) - 1] != '/') {
+    printf("input must be a directory (end with a slash)\n");
+    exit(1);
+  }
+  DIR *dirp = opendir(dir_name);
+  if (errno > 0) {
+    printf("exiting early. failed to open dir %s\n", dir_name);
+    exit(1);
+  }
+
+  struct dirent **dirents = dirents_in_dir(dirp);
+  row_builder *fptr[NUM_COLUMNS] = {&full_mode, &username, &groupname,
+                                    &filesize};
+
+  for (int i = 0; dirents[i] != NULL; i++) {
+    char *basename = dirents[i]->d_name;
+    if (strlen(basename) > 0) {
+      char *abs_path = strcat_i(dir_name, basename);
+      format_and_print_row(NUM_COLUMNS, fptr, abs_path);
+      free(abs_path);
+    }
+  }
+  closedir(dirp);
+  exit(0);
 }
