@@ -38,5 +38,5 @@ void format_and_print_row(int num_cols, row_builder **fptr, char *abs_path) {
     (*(append_col + i))(st, row);
     strcat(row, COLUMN_SEPARATOR);
   }
-  printf("%s%s%s\n", row, COLUMN_SEPARATOR, abs_path);
+  printf("%s%s\n", row, abs_path);
 }

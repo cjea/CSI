@@ -18,13 +18,13 @@ Supports for columns of information: mode (`-m`), user (`-u`), group (`-g`), and
 
 ```
 $ ./ls.out $(pwd)/
-	/Users/cjapel/misc/csi/prep/c/.
-	/Users/cjapel/misc/csi/prep/c/..
-	/Users/cjapel/misc/csi/prep/c/ls.c
-	/Users/cjapel/misc/csi/prep/c/Makefile
-	/Users/cjapel/misc/csi/prep/c/ls.out
-	/Users/cjapel/misc/csi/prep/c/README.md
-	/Users/cjapel/misc/csi/prep/c/pkg
+/Users/cjapel/misc/csi/prep/c/.
+/Users/cjapel/misc/csi/prep/c/..
+/Users/cjapel/misc/csi/prep/c/ls.c
+/Users/cjapel/misc/csi/prep/c/Makefile
+/Users/cjapel/misc/csi/prep/c/ls.out
+/Users/cjapel/misc/csi/prep/c/README.md
+/Users/cjapel/misc/csi/prep/c/pkg
 ```
 
 ```
