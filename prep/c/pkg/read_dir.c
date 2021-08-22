@@ -2,7 +2,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
-struct dirent **dirents_in_dir(DIR *dirp) {
+struct dirent **read_dirents_from_dir(DIR *dirp) {
   struct dirent *dp;
   static struct dirent *dirents[300];
   int num_dirents = 0;
