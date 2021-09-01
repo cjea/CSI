@@ -135,11 +135,17 @@ func GetURLs(tags []AnchorTag) []URL {
 }
 
 func NewPageQueue(slots int) PageQueue {
-	return make(chan Page, slots)
+	return PageQueue{
+		Seen: map[string]struct{}{},
+		Q:    make(chan Page, slots),
+	}
 }
 
 func NewURLQueue(slots int) URLQueue {
-	return make(chan URL, slots)
+	return URLQueue{
+		Seen: map[string]struct{}{},
+		Q:    make(chan URL, slots),
+	}
 }
 
 func GetDir(page Page) Directory {
@@ -153,8 +159,13 @@ func GetDir(page Page) Directory {
 }
 
 func EnqueuePage(pageQueue PageQueue, page Page) {
+	if _, ok := pageQueue.Seen[page.URL.Value]; ok {
+		return
+	}
+
 	select {
-	case pageQueue <- page:
+	case pageQueue.Q <- page:
+		pageQueue.Seen[page.URL.Value] = struct{}{}
 		return
 	case <-time.After(5 * time.Second):
 		fmt.Println("Couldn't publish page for more than 5 seconds")
@@ -162,8 +173,13 @@ func EnqueuePage(pageQueue PageQueue, page Page) {
 }
 
 func EnqueueURL(urlQueue URLQueue, u URL) {
+	if _, ok := urlQueue.Seen[u.Value]; ok {
+		return
+	}
+
 	select {
-	case urlQueue <- u:
+	case urlQueue.Q <- u:
+		urlQueue.Seen[u.Value] = struct{}{}
 		return
 	case <-time.After(5 * time.Second):
 		fmt.Println("Couldn't publish URL for more than 5 seconds")
@@ -211,7 +227,7 @@ func ensureFullURL(u string, host string) string {
 func DequeuePage(queue PageQueue) Page {
 	page := Page{}
 	select {
-	case page = <-queue:
+	case page = <-queue.Q:
 		return page
 	case <-time.After(5 * time.Second):
 		fmt.Println("No message after 5 seconds")
@@ -221,7 +237,7 @@ func DequeuePage(queue PageQueue) Page {
 
 func DequeueURL(queue URLQueue) URL {
 	select {
-	case url := <-queue:
+	case url := <-queue.Q:
 		return url
 	case <-time.After(5 * time.Second):
 		fmt.Println("No message after 5 seconds")
@@ -235,7 +251,7 @@ func rewriteHost(url URL, host string) {
 
 func PublishURL(queue URLQueue, url URL) {
 	select {
-	case queue <- url:
+	case queue.Q <- url:
 	case <-time.After(5 * time.Second):
 		fmt.Println("Couldn't publish URL for more than 5 seconds")
 	}
@@ -245,8 +261,16 @@ type Page struct {
 	URL  URL
 	Data []byte
 }
-type PageQueue chan Page
-type URLQueue chan URL
+type PageQueue struct {
+	Seen map[string]struct{}
+	Q    chan Page
+}
+
+type URLQueue struct {
+	Seen map[string]struct{}
+	Q    chan URL
+}
+
 type AnchorTag struct{ Value string }
 type Directory struct{ Path string }
 type URL struct {
