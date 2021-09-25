@@ -1,9 +1,9 @@
 .PHONY: phony
 run: phony ## Run the app.
-	@ go run main.go
+	@ go run main.go https://www.ebay.com
 
 test: phony ## Execute unit tests.
-	go run github.com/onsi/ginkgo/ginkgo
+	go run github.com/onsi/ginkgo/ginkgo -r
 
 BLUE := $(shell tput setaf 4)
 RESET := $(shell tput sgr0)

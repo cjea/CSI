@@ -1,15 +1,17 @@
 package main
 
 import (
-	"bytes"
+	"errors"
 	"fmt"
-	"math"
-	"regexp"
-	"strings"
+	"net/url"
+	"os"
+	"sync"
+	"sync/atomic"
 	"time"
 
-	"github.com/valyala/fasthttp"
-	"golang.org/x/net/html"
+	"csi_prep_golang/pkg/model"
+	"csi_prep_golang/pkg/pub"
+	"csi_prep_golang/pkg/sub"
 )
 
 /*
@@ -23,276 +25,87 @@ WritePage :: (Page, Directory) -> ()  |     FetchPage :: URL -> Page
 DequeuePage :: Queue -> Page          |     ParseHTML :: Page -> HTMLNode
 NewQueue :: () -> Queue               |     GetAnchorTags :: HTMLNode -> []AnchorTag
 GetDir :: Page -> Directory           |     GetURLs :: []AnchorTag -> []URL
-                                      |     PublishPage :: (Page, Queue) -> ()
+                                      |     EnqueuePage :: (Page, Queue) -> ()
                                       |     Dequeue :: Queue -> URL
                                       |     Enqueue :: (URL, Queue) -> ()
                       Page :: { URL, Body }
 
 Indexer flow                                     Fetcher flow
 ============                                     ============
-NewQueue |> Dequeue |> GetDir |> WritePage       NewQueue |> Dequeue |> FetchPage |> ParseHTML |> GetAnchorTags |> GetURLs |> Publish(URLQueue)
-                                                                     |
-                                                                     |> Publish
+NewQueue |> Dequeue |> GetDir |> WritePage       NewQueue |> Dequeue |> FetchPage |> ParseHTML |> GetAnchorTags |> GetURLs |> Enqueue(URLQueue)
+                                                                                  |
+                                                                                  |> TranslateURLs |> Enqueue
 
 */
 
 func main() {
 	fmt.Println("Running")
-	done := make(chan int)
-	pageQueue := NewPageQueue(100)
-	urlQueue := NewURLQueue(100)
-
-	go EnqueueURL(urlQueue, URL{Value: "https://www.ebay.com"})
-	go Publish(pageQueue, urlQueue, done)
-	go Subscribe(pageQueue, done)
-}
-
-func Subscribe(pageQueue PageQueue, quit chan int) {
-	for {
-		done := make(chan int)
-		go WritePage(DequeuePage(pageQueue), done)
-		select {
-		case <-done:
-			continue
-		case <-quit:
-			return
-		}
-	}
-}
-
-func Publish(pageQueue PageQueue, urlQueue URLQueue, quit chan int) {
-	page := FetchURL(DequeueURL(urlQueue))
-	if page.URL.Value == "" {
-		return
-	}
-
-	go EnqueuePage(pageQueue, page)
-	go Crawl(urlQueue, page)
-}
-
-func Crawl(urlQueue URLQueue, page Page) {
-	for _, href := range GetURLs(GetAnchorTags(ParseHTML(page))) {
-		PublishURL(urlQueue, href)
-	}
-}
-
-func WritePage(page Page, done chan int) {
-}
-
-const maxWaitSeconds = 3
-
-func FetchURL(url URL) Page {
-	status, body, err := fasthttp.Get(nil, url.Value)
+	pubDone := make(chan int)
+	subDone := make(chan int)
+	host, err := url.Parse(os.Args[1])
 	if err != nil {
-		return Page{}
+		fmt.Println(fmt.Errorf("first arg needs to be a valid URL: %w", err))
+		os.Exit(1)
 	}
-	if status > 299 {
-		for retries := float64(0); retries < 4 && status > 299; retries++ {
-			sleepTime := math.Min(float64(math.Pow(2, retries)), maxWaitSeconds)
-			time.Sleep(time.Duration(sleepTime) * time.Second)
-			status, body, err = fasthttp.Get(nil, url.Value)
-		}
-		fmt.Printf("Failed to fetch %s\n", url)
-		return Page{}
-	}
-	return Page{
-		URL:  url,
-		Data: body,
-	}
-}
+	pageQueue := model.NewPageQueue(100)
+	urlQueue := model.NewURLQueue(100)
+	urlQueue.Enqueue(model.URL{Value: host.String()})
 
-func ParseHTML(page Page) HTMLNode {
-	doc, err := html.Parse(bytes.NewReader(page.Data))
-	if err != nil {
-		fmt.Printf("Could not parse html: %v\n", err)
-		return HTMLNode{}
-	}
-
-	return HTMLNode{Node: doc}
-}
-
-func GetAnchorTags(n HTMLNode) []AnchorTag {
-	ret := []AnchorTag{}
-	n.ApplyAll(func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == "a" {
-			for _, attr := range n.Attr {
-				if attr.Key == "href" {
-					ret = append(ret, AnchorTag{Value: attr.Val})
+	/*
+		Once a second, launch a publisher and subscriber. When 2 pubs and 2 subs
+		time out, then exit. Successful pub & sub restart counters.
+	*/
+	var pubTimeouts int32 = 0
+	var subTimeouts int32 = 0
+	for pubTimeouts < 2 && subTimeouts < 2 {
+		go func() {
+			errCh := make(chan error)
+			go sub.Subscribe(pageQueue, errCh)
+			err := <-errCh
+			if err != nil {
+				if errors.Is(err, model.ErrTimeout) {
+					atomic.AddInt32(&pubTimeouts, 1)
 				}
 			}
-		}
-	})
-	return ret
+		}()
 
-}
-
-func GetURLs(tags []AnchorTag) []URL {
-	ret := []URL{}
-	for _, tag := range tags {
-		ret = append(ret, URL{tag.Value})
-	}
-	return ret
-}
-
-func NewPageQueue(slots int) PageQueue {
-	return PageQueue{
-		Seen: map[string]struct{}{},
-		Q:    make(chan Page, slots),
-	}
-}
-
-func NewURLQueue(slots int) URLQueue {
-	return URLQueue{
-		Seen: map[string]struct{}{},
-		Q:    make(chan URL, slots),
-	}
-}
-
-func GetDir(page Page) Directory {
-	// u := page.URL.Value
-	// if !(strings.HasPrefix(u, "http") || strings.HasPrefix(u, "https")) {
-	// 	if strings.Index(u, ".") < strings.Index(u, "")
-	// 	u = "//" + u
-	// }
-
-	return Directory{Path: fmt.Sprintf(`./%s/`, page.URL.Value)}
-}
-
-func EnqueuePage(pageQueue PageQueue, page Page) {
-	if _, ok := pageQueue.Seen[page.URL.Value]; ok {
-		return
-	}
-
-	select {
-	case pageQueue.Q <- page:
-		pageQueue.Seen[page.URL.Value] = struct{}{}
-		return
-	case <-time.After(5 * time.Second):
-		fmt.Println("Couldn't publish page for more than 5 seconds")
-	}
-}
-
-func EnqueueURL(urlQueue URLQueue, u URL) {
-	if _, ok := urlQueue.Seen[u.Value]; ok {
-		return
-	}
-
-	select {
-	case urlQueue.Q <- u:
-		urlQueue.Seen[u.Value] = struct{}{}
-		return
-	case <-time.After(5 * time.Second):
-		fmt.Println("Couldn't publish URL for more than 5 seconds")
-	}
-}
-
-var (
-	chars              = `[^\/]+`
-	dot                = `\.`
-	slash              = `\/`
-	blankDotBlank      = regexp.MustCompile(chars + dot + chars)
-	blankDotBlankSlash = regexp.MustCompile(chars + dot + chars + slash)
-)
-
-// TODO(cjea): figure out how to do this sanely.
-// Problems e.g. how do you know if "index.html" is a host, or a path?
-func ensureFullURL(u string, host string) string {
-	hasScheme := strings.HasPrefix(u, "http") || strings.HasPrefix(u, "https") ||
-		strings.HasPrefix(u, "||")
-	bs := []byte(u)
-	if u[0] == '/' {
-		return "//" + host + u
-	}
-	if matches := blankDotBlankSlash.FindSubmatch(bs); len(matches) > 0 {
-		if hasScheme {
-			return u
-		}
-		return "//" + u
-	} else if matches := blankDotBlank.FindSubmatch(bs); len(matches) > 0 {
-		if string(matches[0]) == host {
-			if hasScheme {
-				return u
+		go func() {
+			errCh := make(chan error)
+			go pub.Publish(pageQueue, urlQueue, errCh)
+			err := <-errCh
+			if err != nil {
+				if errors.Is(err, model.ErrTimeout) {
+					atomic.AddInt32(&pubTimeouts, 1)
+				}
 			}
-			return "//" + u
-		}
-		return "//" + host + "/" + u
-	} else if !hasScheme {
-		return "//" + host + "/" + u
-	} else {
-		// can probably never get here
-		return u
-	}
-}
-
-func DequeuePage(queue PageQueue) Page {
-	page := Page{}
-	select {
-	case page = <-queue.Q:
-		return page
-	case <-time.After(5 * time.Second):
-		fmt.Println("No message after 5 seconds")
-		return page
-	}
-}
-
-func DequeueURL(queue URLQueue) URL {
-	select {
-	case url := <-queue.Q:
-		return url
-	case <-time.After(5 * time.Second):
-		fmt.Println("No message after 5 seconds")
-		return URL{}
-	}
-}
-
-func rewriteHost(url URL, host string) {
-
-}
-
-func PublishURL(queue URLQueue, url URL) {
-	select {
-	case queue.Q <- url:
-	case <-time.After(5 * time.Second):
-		fmt.Println("Couldn't publish URL for more than 5 seconds")
-	}
-}
-
-type Page struct {
-	URL  URL
-	Data []byte
-}
-type PageQueue struct {
-	Seen map[string]struct{}
-	Q    chan Page
-}
-
-type URLQueue struct {
-	Seen map[string]struct{}
-	Q    chan URL
-}
-
-type AnchorTag struct{ Value string }
-type Directory struct{ Path string }
-type URL struct {
-	Value string
-}
-type HTMLNode struct {
-	Node *html.Node
-}
-
-func (n HTMLNode) ApplyAll(f func(*html.Node)) {
-	queue := []*html.Node{n.Node}
-	for len(queue) > 0 {
-		el := queue[0]
-		queue = queue[1:]
-		if el == nil {
-			continue
-		}
-		for ; el != nil; el = el.NextSibling {
-			f(el)
-			queue = append(queue, el.FirstChild)
+		}()
+		select {
+		case <-time.After(time.Second):
+			pubTimeouts++
+			subTimeouts++
 		}
 	}
-}
 
-type Subscription struct{}
+	wg := sync.WaitGroup{}
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			pub.Publish(pageQueue, urlQueue, pubDone)
+			sub.Subscribe(pageQueue, ".", subDone)
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+
+	for {
+		select {
+		case <-pubDone:
+			<-subDone
+			fmt.Printf("done\n")
+		case <-time.After(10 * time.Second):
+			go pub.Publish(pageQueue, urlQueue, pubDone)
+			go sub.Subscribe(pageQueue, ".", subDone)
+		}
+	}
+
+}
