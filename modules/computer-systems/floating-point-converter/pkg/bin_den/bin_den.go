@@ -70,5 +70,5 @@ func btod(bits string, exp int) BtodSteps {
 }
 
 func fmt32(f float64) string {
-	return strconv.FormatFloat(f, 'f', -1, 32)
+	return strconv.FormatFloat(f, 'f', -1, 64)
 }
