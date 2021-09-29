@@ -24,21 +24,21 @@ ALL_OBJS = $(filter-out $(EXCLUSIONS),$(C_OBJS) $(AS_OBJS) vendor/unity.o)
 CC_CMD = $(CC) $(ALL_CFLAGS) -c -o $@ $<
 
 all: tests
-	@./$<
+	./$<
 
 tests: $(ALL_OBJS)
-	@$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -o $@ $(ALL_OBJS)
+	$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -o $@ $(ALL_OBJS)
 
 %.o: %.asm
-	@$(AS) $(ALL_ASFLAGS) -o $@ $<
+	$(AS) $(ALL_ASFLAGS) -o $@ $<
 
 %.o: %.c
-	@$(CC_CMD)
+	$(CC_CMD)
 
 vendor/unity.o: vendor/unity.c vendor/unity.h vendor/unity_internals.h
-	@$(CC_CMD)
+	$(CC_CMD)
 
 clean:
-	@rm -f *.o vendor/*.o tests
+	rm -f *.o vendor/*.o tests
 
 .PHONY: all clean
