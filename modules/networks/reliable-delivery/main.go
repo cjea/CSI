@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"livery/pkg/livery"
 	"net"
+	"time"
 )
 
 /*
@@ -72,11 +73,29 @@ Alice: GOODBYE (TTL 60)
 BOB:   GOODBYE (TTL 60)
 */
 
-const hostname = "127.0.0.1:53865"
+const serverHostname = "127.0.0.1:53865"
 
 func main() {
-	c, err := livery.StartConversation(hostname)
-	must(err)
+	go func() {
+		fmt.Printf("Listening on %s\n", serverHostname)
+		l, err := net.ListenUDP("udp", &net.UDPAddr{
+			IP:   net.IP{127, 0, 0, 1},
+			Port: 53865,
+		})
+		must(err)
+		buf := []byte{}
+		for {
+			n, _, err := l.ReadFrom(buf)
+			if n > 0 {
+				fmt.Printf("Listener received message '%s'\n", string(buf))
+				continue
+			}
+
+			fmt.Printf("Received %d bytes\n", n)
+			must(err)
+			time.Sleep(1 * time.Second)
+		}
+	}()
 
 	actions := []livery.Action{
 		{Op: livery.SEND_HELLO, Body: nil},
@@ -84,13 +103,17 @@ func main() {
 		{Op: livery.SEND_DATA, Body: []byte("the really secret message")},
 		{Op: livery.RECV_DATA_CONFIRMATION, Body: nil},
 	}
-	fmt.Printf("socket addr: %#v\n", c.Conn.LocalAddr())
+
+	c := livery.StartConversation(
+		&net.UDPAddr{IP: net.IP{127, 0, 0, 1}, Port: 53865},
+	)
+
 	for i := 0; i < len(actions) && c.Err == nil; i++ {
 		c.RunOp(actions[i])
 	}
 
-	fmt.Printf("Conversation: %v\nErr: %s\n", c, c.Err)
-	// c.Close()
+	fmt.Printf("Conversation: %s\n", c.String())
+	c.Close()
 	// fmt.Printf("Number of statuses %+v\n", livery.NUM_LIVERY_STATUSES)
 	// fmt.Printf("Number of actions %+v\n", livery.NUM_LIVERY_OPS)
 }
