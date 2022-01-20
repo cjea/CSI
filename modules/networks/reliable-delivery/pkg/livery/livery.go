@@ -8,7 +8,7 @@ import (
 
 const (
 	MAX_DATAGRAM_SIZE_BYTES = 1 << 10
-	WAIT_TTL                = 10000 * time.Second
+	WAIT_TTL                = 1 * time.Second
 	NUM_EMPTY_READS_ALLOWED = 5
 )
 
@@ -75,17 +75,21 @@ func (s *Sender) Read(buf []byte) {
 	emptyReads := 0
 	fmt.Printf("Client is beginning a read\n")
 
-	// s.Conn.SetReadDeadline(time.Now().Add(WAIT_TTL))
+	s.Conn.SetReadDeadline(time.Now().Add(WAIT_TTL))
 	n, _, err := s.Conn.ReadFrom(buf)
 	fmt.Printf("Client completed a read\n")
 
-	for err == nil && n == 0 && emptyReads < NUM_EMPTY_READS_ALLOWED {
+	for n == 0 && emptyReads < NUM_EMPTY_READS_ALLOWED {
+		if err != nil {
+			fmt.Printf("Errored with '%s', but continuing.\n", err.Error())
+			continue
+		}
 		fmt.Printf("Failed read #%d (%d bytes)", emptyReads, n)
 		emptyReads += 1
 		time.Sleep(1 * time.Second)
 		n, _, err = s.Conn.ReadFrom(buf)
 	}
-	fmt.Printf("Client stopped reading: %v\n", err)
+	fmt.Printf("Client stopped reading: %#v\n", err)
 	s.Error(err)
 }
 

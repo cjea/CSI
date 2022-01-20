@@ -83,16 +83,19 @@ func main() {
 			Port: 53865,
 		})
 		must(err)
+		consecutiveZero := 0
 		buf := []byte{}
-		for {
+		for consecutiveZero < 10 {
 			n, _, err := l.ReadFrom(buf)
 			if n > 0 {
-				fmt.Printf("Listener received message '%s'\n", string(buf))
+				fmt.Printf("Received %d bytes\n", n)
+				fmt.Printf("... with message '%s'\n", string(buf))
+				consecutiveZero = 0
 				continue
 			}
-
-			fmt.Printf("Received %d bytes\n", n)
 			must(err)
+			consecutiveZero += 1
+			fmt.Printf("Consecutive empty reads: %d\n", consecutiveZero)
 			time.Sleep(1 * time.Second)
 		}
 	}()
