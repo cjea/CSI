@@ -1,0 +1,342 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-layout="">
+  <head>
+    
+    <script>
+      window.addEventListener('error', window.__err=function f(e){f.p=f.p||[];f.p.push(e)});
+    </script>
+    <script>
+      (function() {
+        const theme = document.cookie.match(/prefers-color-scheme=(light|dark|auto)/)?.[1]
+        if (theme) {
+          document.querySelector('html').setAttribute('data-theme', theme);
+        }
+      }())
+    </script>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+      <meta name="description" content="Go is an open source programming language that makes it easy to build simple, reliable, and efficient software.">
+    
+    
+    <meta class="js-gtmID" data-gtmid="GTM-W8MVQXG">
+    <link rel="shortcut icon" href="/static/shared/icon/favicon.ico">
+    
+    
+    
+      <link href="/static/shared/reset.css?version=2021-08-17t19-42-d55eaf148f96ec3527e862224325de4971781d65" rel="stylesheet">
+    
+    <link href="/static/frontend/frontend.css?version=2021-08-17t19-42-d55eaf148f96ec3527e862224325de4971781d65" rel="stylesheet">
+    
+      <title>pkg.go.dev</title>
+    
+    
+  <link href="/static/frontend/homepage/homepage.css?version=2021-08-17t19-42-d55eaf148f96ec3527e862224325de4971781d65" rel="stylesheet">
+
+  </head>
+  <body>
+    
+    <script>
+      function loadScript(src) {
+        let s = document.createElement('script');
+        s.src = src;
+        s.type = 'module';
+        s.async = true;
+        s.defer = true
+        document.head.appendChild(s);
+      }
+      loadScript("/static/frontend/frontend.js");
+    </script>
+    
+    
+  <header class="go-Header js-siteHeader">
+    <div class="go-Banner">
+      <div class="go-Banner-inner">
+        <div class="go-Banner-message">Black Lives Matter</div>
+        <a class="go-Banner-action"
+          href="https://support.eji.org/give/153413/#!/donation/checkout"
+          target="_blank"
+          rel="noopener">Support the Equal Justice Initiative</a>
+      </div>
+    </div>
+    <div class="go-Header-inner go-Header-inner--dark">
+      <nav class="go-Header-nav">
+        <a href="https://go.dev/" class="js-headerLogo" data-gtmc="nav link"
+            data-test-id="go-header-logo-link">
+          <img class="go-Header-logo" src="/static/shared/logo/go-white.svg" alt="Go">
+        </a>
+        <div class="go-Header-rightContent">
+          
+<div class="go-SearchForm js-searchForm">
+  <form
+    class="go-InputGroup go-SearchForm-form"
+    action="/search"
+    data-gtmc="search form"
+    aria-label="Search for a package"
+    role="search"
+  >
+    
+    <input name="q" class="go-Input js-searchFocus" aria-label="Search for a package" type="search"
+        autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false"
+        placeholder="Search for a package" value="" />
+    <button class="go-Button go-Button--inverted" aria-label="Submit search">
+      <img
+        class="go-Icon"
+        height="24"
+        width="24"
+        src="/static/shared/icon/search_gm_grey_24dp.svg"
+        alt=""
+      />
+    </button>
+  </form>
+  <button class="go-SearchForm-expandSearch js-expandSearch" data-gtmc="nav button"
+      aria-label="Open search" data-test-id="expand-search">
+    <img class="go-Icon go-Icon--inverted" height="24" width="24"
+        src="/static/shared/icon/search_gm_grey_24dp.svg" alt="">
+  </button>
+</div>
+
+          <ul class="go-Header-menu">
+            <li class="go-Header-menuItem">
+              <a href="https://go.dev/solutions/" data-gtmc="nav link">Why Go</a>
+            </li>
+            <li class="go-Header-menuItem">
+              <a href="https://go.dev/learn/" data-gtmc="nav link">Getting Started</a>
+            </li>
+            <li class="go-Header-menuItem go-Header-menuItem--active">
+              <a href="/" data-gtmc="nav link">Discover Packages</a>
+            </li>
+            <li class="go-Header-menuItem">
+              <a href="https://go.dev/about" data-gtmc="nav link">About</a>
+            </li>
+          </ul>
+          <button class="go-Header-navOpen js-headerMenuButton go-Header-navOpen--white" data-gtmc="nav button" aria-label="Open navigation">
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <aside class="go-NavigationDrawer js-header">
+    <nav>
+      <div class="go-NavigationDrawer-header">
+        <a href="https://go.dev/" tabindex="-1">
+          <img class="go-NavigationDrawer-logo" src="/static/shared/logo/go-blue.svg" alt="Go.">
+        </a>
+      </div>
+      <ul class="go-NavigationDrawer-list">
+          <li class="go-NavigationDrawer-listItem">
+            <a href="https://go.dev/solutions/" tabindex="-1">Why Go</a>
+          </li>
+          <li class="go-NavigationDrawer-listItem">
+            <a href="https://go.dev/learn/" tabindex="-1">Getting Started</a>
+          </li>
+          <li class="go-NavigationDrawer-listItem go-NavigationDrawer-listItem--active">
+            <a href="/" tabindex="-1">Discover Packages</a>
+          </li>
+          <li class="go-NavigationDrawer-listItem">
+            <a href="https://go.dev/about" tabindex="-1">About</a>
+          </li>
+      </ul>
+    </nav>
+  </aside>
+  <div class="go-NavigationDrawer-scrim js-scrim" role="presentation"></div>
+
+    
+      
+  <main class="go-Container">
+    <div class="go-Content go-Content--center">
+      <img class="Homepage-logo" width="700" height="300"
+          src="/static/shared/gopher/package-search-700x300.jpeg" alt="Cartoon gopher typing">
+      <form class="go-InputGroup Homepage-search
+          "
+          action="/search" role="search" data-gtmc="homepage search form"
+          aria-label="Search for a Package">
+        
+        <input
+          class="go-Input js-searchFocus"
+          data-test-id="homepage-search"
+          id="AutoComplete"
+          role="textbox"
+          aria-label="Search for Go packages"
+          type="search"
+          name="q"
+          placeholder="Search for Go packages"
+          autocapitalize="off"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+          title="Search for Go packages"
+          autofocus="true">
+        <button type="submit" class="go-Button">Search</button>
+      </form>
+      <span class="Homepage-searchHelp">
+        <div class="Homepage-exampleSearches">
+          <span class="Homepage-exampleSearchesLabel">Example searches:</span>
+          <a class="Homepage-exampleSearch" href="/search?q=http">“http”</a>
+          <a class="Homepage-exampleSearch" href="/search?q=command">“command”</a>
+          
+            <a class="Homepage-exampleSearch" href="/search?q=yaml+OR+json+OR+xml">“yaml OR json OR xml”</a>
+          
+        </div>
+        <a href="/search-help" target="_blank" rel="noopener" class="Homepage-helpLink">
+          Search help <span><img width="24" height="24" src="/static/shared/icon/launch_gm_grey_24dp.svg" alt=""></span>
+        </a>
+      <span>
+    </div>
+  </main>
+
+    
+    
+  <footer class="go-Footer">
+    
+  <div class="Questions">
+    <div class="Questions-content">
+      <div class="Questions-header">Frequently asked questions:</div>
+      <ul>
+        <li><a href="https://go.dev/about#adding-a-package">How can I add a package?</a></li>
+        <li><a href="https://go.dev/about#removing-a-package">How can I remove a package?</a></li>
+        <li><a href="https://go.dev/about#creating-a-badge">How can I add a go badge in my README file?</a></li>
+      </ul>
+    </div>
+  </div>
+
+    <div class="go-Footer-links">
+      <div class="go-Footer-linkColumn">
+        <a href="https://go.dev/solutions" class="go-Footer-link go-Footer-link--primary"
+            data-gtmc="footer link">
+          Why Go
+        </a>
+        <a href="https://go.dev/solutions#use-cases" class="go-Footer-link"
+            data-gtmc="footer link">
+          Use Cases
+        </a>
+        <a href="https://go.dev/solutions#case-studies" class="go-Footer-link"
+            data-gtmc="footer link">
+          Case Studies
+        </a>
+      </div>
+      <div class="go-Footer-linkColumn">
+        <a href="https://learn.go.dev/" class="go-Footer-link go-Footer-link--primary"
+            data-gtmc="footer link">
+          Getting Started
+        </a>
+        <a href="https://play.golang.org" class="go-Footer-link" data-gtmc="footer link">
+          Playground
+        </a>
+        <a href="https://tour.golang.org" class="go-Footer-link" data-gtmc="footer link">
+          Tour
+        </a>
+        <a href="https://stackoverflow.com/questions/tagged/go?tab=Newest" class="go-Footer-link"
+            data-gtmc="footer link">
+          Stack Overflow
+        </a>
+      </div>
+      <div class="go-Footer-linkColumn">
+        <a href="https://pkg.go.dev" class="go-Footer-link go-Footer-link--primary"
+            data-gtmc="footer link">
+          Discover Packages
+        </a>
+      </div>
+      <div class="go-Footer-linkColumn">
+        <a href="https://go.dev/about" class="go-Footer-link go-Footer-link--primary"
+            data-gtmc="footer link">
+          About
+        </a>
+        <a href="https://golang.org/dl/" class="go-Footer-link" data-gtmc="footer link">Download</a>
+        <a href="https://blog.golang.org" class="go-Footer-link" data-gtmc="footer link">Blog</a>
+        <a href="https://github.com/golang/go/issues" class="go-Footer-link" data-gtmc="footer link">
+          Issue Tracker
+        </a>
+        <a href="https://golang.org/doc/devel/release.html" class="go-Footer-link"
+            data-gtmc="footer link">
+          Release Notes
+        </a>
+        <a href="https://blog.golang.org/go-brand" class="go-Footer-link" data-gtmc="footer link">
+          Brand Guidelines
+        </a>
+        <a href="https://golang.org/conduct" class="go-Footer-link" data-gtmc="footer link">
+          Code of Conduct
+        </a>
+      </div>
+      <div class="go-Footer-linkColumn">
+        <a href="https://www.twitter.com/golang" class="go-Footer-link go-Footer-link--primary"
+            data-gtmc="footer link">
+          Connect
+        </a>
+        <a href="https://www.twitter.com/golang" class="go-Footer-link" data-gtmc="footer link">
+          Twitter
+        </a>
+        <a href="https://github.com/golang" class="go-Footer-link" data-gtmc="footer link">GitHub</a>
+        <a href="https://invite.slack.golangbridge.org/" class="go-Footer-link"
+            data-gtmc="footer link">
+          Slack
+        </a>
+        <a href="https://reddit.com/r/golang" class="go-Footer-link" data-gtmc="footer link">
+          Reddit
+        </a>
+        <a href="https://www.meetup.com/pro/go" class="go-Footer-link" data-gtmc="footer link">
+          Meetup
+        </a>
+        <a href="https://golangweekly.com/" class="go-Footer-link" data-gtmc="footer link">
+          Golang Weekly
+        </a>
+      </div>
+    </div>
+    <div class="go-Footer-bottom">
+      <img class="go-Footer-gopher"  width="1431" height="901" 
+          src="/static/shared/gopher/pilot-bust-1431x901.svg" alt="Gopher in flight goggles">
+      <ul class="go-Footer-listRow">
+        <li class="go-Footer-listItem">
+          <a href="https://go.dev/copyright" data-gtmc="footer link">Copyright</a>
+        </li>
+        <li class="go-Footer-listItem">
+          <a href="https://go.dev/tos" data-gtmc="footer link">Terms of Service</a>
+        </li>
+        <li class="go-Footer-listItem">
+          <a href="http://www.google.com/intl/en/policies/privacy/" data-gtmc="footer link"
+              target="_blank" rel="noopener">
+            Privacy Policy
+          </a>
+        </li>
+        <li class="go-Footer-listItem">
+          <a href="https://golang.org/s/pkgsite-feedback" target="_blank" rel="noopener"
+              data-gtmc="footer link">
+            Report an Issue
+          </a>
+        </li>
+        <li class="go-Footer-listItem">
+          <a href="https://golang.org" target="_blank" rel="noopener" data-gtmc="footer link">
+            golang.org
+          </a>
+        </li>
+      </ul>
+      <a class="go-Footer-googleLogo" href="https://google.com" target="_blank"rel="noopener"
+          data-gtmc="footer link">
+        <img class="go-Footer-googleLogoImg" height="24" width="72"
+            src="/static/shared/logo/google-white.svg" alt="Google logo">
+      </a>
+    </div>
+  </footer>
+
+    
+    
+      <script>
+        // this will throw if the querySelector can’t find the element
+        const gtmId = document.querySelector('.js-gtmID').dataset.gtmid;
+        if (!gtmId) {
+          throw new Error('Google Tag Manager ID not found');
+        }
+        loadScript(`https://www.googletagmanager.com/gtm.js?id=${gtmId}`);
+      </script>
+      <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W8MVQXG"
+                height="0" width="0" style="display:none;visibility:hidden">
+        </iframe>
+      </noscript>
+    
+    
+  </body>
+</html>
