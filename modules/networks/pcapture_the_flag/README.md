@@ -1,0 +1,1 @@
+The program you write will follow this pattern: you will parse the Ethernet frames first, then the IP datagrams from within them, follow by the TCP segments, which when stitched back together will enable you to parse out the HTTP messages.
