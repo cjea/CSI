@@ -336,27 +336,21 @@ var keys = preGenRandomKeys("key-", 1<<10, 1, 1<<14)
 func BenchmarkGet4k(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		b.StopTimer()
 		k := []byte(keys[i%len(keys)])
-		b.StartTimer()
 		_, _ = seededList4k.Get(k)
 	}
 }
 func BenchmarkGet8k(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		b.StopTimer()
 		k := []byte(keys[i%len(keys)])
-		b.StartTimer()
 		_, _ = seededList8k.Get(k)
 	}
 }
 func BenchmarkGet16k(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		b.StopTimer()
 		k := []byte(keys[i%len(keys)])
-		b.StartTimer()
 		_, _ = seededList16k.Get(k)
 	}
 }
@@ -364,9 +358,7 @@ func BenchmarkGet16k(b *testing.B) {
 func BenchmarkGet32k(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		b.StopTimer()
 		k := []byte(keys[i%len(keys)])
-		b.StartTimer()
 		_, _ = seededList32k.Get(k)
 	}
 }
