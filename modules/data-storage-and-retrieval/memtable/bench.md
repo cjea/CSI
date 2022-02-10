@@ -17,8 +17,8 @@ MAX_LEVEL=16, 1/5 chance of leveling:
 goos: darwin
 goarch: amd64
 pkg: memtable/pkg/skiplist
-BenchmarkGet4k-8         2218915               541.6 ns/op
-BenchmarkGet8k-8         1670294               656.1 ns/op
-BenchmarkGet16k-8        1443441               823.2 ns/op
-BenchmarkGet32k-8        1380772               866.6 ns/op
+BenchmarkGet4k-8         2283508               478.9 ns/op
+BenchmarkGet8k-8         2155312               513.7 ns/op
+BenchmarkGet16k-8        1856026               636.3 ns/op
+BenchmarkGet32k-8        1752372               689.9 ns/op
 ```

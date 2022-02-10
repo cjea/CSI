@@ -1,6 +1,7 @@
 package skiplist
 
 import (
+	"bytes"
 	"fmt"
 	"memtable/pkg/coinflip"
 	"memtable/pkg/storage"
@@ -229,31 +230,11 @@ func (i *Iterator) Value() []byte {
 }
 
 func lte(b1, b2 []byte) bool {
-	l1 := len(b1)
-	l2 := len(b2)
-	for p := 0; p < l1 && p < l2; p++ {
-		if b1[p] > b2[p] {
-			return false
-		}
-		if b1[p] < b2[p] {
-			return true
-		}
-	}
-	return l1 <= l2
+	return bytes.Compare(b1, b2) < 1
 }
 
 func lt(b1, b2 []byte) bool {
-	l1 := len(b1)
-	l2 := len(b2)
-	for p := 0; p < l1 && p < l2; p++ {
-		if b1[p] > b2[p] {
-			return false
-		}
-		if b1[p] < b2[p] {
-			return true
-		}
-	}
-	return l1 < l2
+	return bytes.Compare(b1, b2) < 0
 }
 
 func must(err error) {
