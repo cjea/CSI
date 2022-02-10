@@ -150,7 +150,24 @@ func (s *Skiplist) delete(key Key) error {
 }
 
 func (s *Skiplist) RangeScan(start, limit []byte) (exercise.Iterator, error) {
-	panic("Skiplist#RangeScan is not implemented")
+	if lt(limit, start) {
+		return nil, fmt.Errorf(
+			"range invalid: start of range must be less than or equal to limit (start=%v, limit=%v",
+			start, limit,
+		)
+	}
+	startKey := NewKey(start)
+	endKey := NewKey(limit)
+	n := s.Scan(NewKey(start))
+	for n != nil && lt(n.Key.key, startKey.key) {
+		n = n.Next
+	}
+	return &Iterator{
+		Current: nil,
+		onDeck:  n,
+		end:     endKey,
+		err:     nil,
+	}, nil
 }
 
 func New() *Skiplist {
@@ -159,19 +176,42 @@ func New() *Skiplist {
 	return ret
 }
 
-type Iterator struct{}
+type Iterator struct {
+	Current *Node
+	onDeck  *Node
+	end     Key
+	err     error
+}
 
-func (i Iterator) Next() bool {
-	panic("Iterator#Next not implemented")
+func (i *Iterator) Next() bool {
+	if i.Done() {
+		return false
+	}
+	i.Current = i.onDeck
+	i.onDeck = i.Current.Next
+	return true
 }
-func (i Iterator) Error() error {
-	panic("Iterator#Error not implemented")
+
+func (i *Iterator) Done() bool {
+	keyTooHigh := false
+	if i.onDeck != nil {
+		keyTooHigh = !lt(i.onDeck.Key.key, i.end.key)
+		if keyTooHigh {
+		}
+	}
+	return i.Error() != nil || keyTooHigh || i.onDeck == nil
 }
-func (i Iterator) Key() []byte {
-	panic("Iterator#Key not implemented")
+
+func (i *Iterator) Error() error {
+	return i.err
 }
-func (i Iterator) Value() []byte {
-	panic("Iterator#Value not implemented")
+
+func (i *Iterator) Key() []byte {
+	return i.Current.Key.key
+}
+
+func (i *Iterator) Value() []byte {
+	return i.Current.Val
 }
 
 func lte(b1, b2 []byte) bool {
@@ -186,6 +226,20 @@ func lte(b1, b2 []byte) bool {
 		}
 	}
 	return l1 <= l2
+}
+
+func lt(b1, b2 []byte) bool {
+	l1 := len(b1)
+	l2 := len(b2)
+	for p := 0; p < l1 && p < l2; p++ {
+		if b1[p] > b2[p] {
+			return false
+		}
+		if b1[p] < b2[p] {
+			return true
+		}
+	}
+	return l1 < l2
 }
 
 func must(err error) {

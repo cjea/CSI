@@ -232,3 +232,63 @@ func TestDelete(t *testing.T) {
 		t.Errorf("Key %v should have been deleted but it was found", k)
 	}
 }
+
+func TestRangeScan(t *testing.T) {
+	l := New()
+	for i := 0; i < 26; i++ {
+		l.Put([]byte{byte(i + 97)}, []byte(fmt.Sprintf("val_%c", i+97)))
+	}
+	t.Run("half-inclusive range", func(t *testing.T) {
+		it, err := l.RangeScan([]byte("ba"), []byte("f"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		res := []string{}
+		for it.Next() {
+			res = append(res, string(it.Value()))
+		}
+		expected := []string{"val_c", "val_d", "val_e"}
+		if len(res) != 3 {
+			t.Errorf("Expected %d values; got %d (%#v)", len(expected), len(res), res)
+		}
+		if res[0] != expected[0] || res[1] != expected[1] || res[2] != expected[2] {
+			t.Errorf("Expected %#v; got %#v", expected, res)
+		}
+	})
+
+	t.Run("past the end of the list", func(t *testing.T) {
+		it, err := l.RangeScan([]byte("z"), []byte("zz"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		res := []string{}
+		for it.Next() {
+			res = append(res, string(it.Value()))
+		}
+		expected := []string{"val_z"}
+		if len(res) != 1 {
+			t.Errorf("Expected %d value; got %d (%#v)", len(expected), len(res), res)
+		}
+		if res[0] != expected[0] {
+			t.Errorf("Expected %#v; got %#v", expected, res)
+		}
+	})
+
+	t.Run("before the start of the list", func(t *testing.T) {
+		it, err := l.RangeScan([]byte("01"), []byte("c"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		res := []string{}
+		for it.Next() {
+			res = append(res, string(it.Value()))
+		}
+		expected := []string{"val_a", "val_b"}
+		if len(res) != 2 {
+			t.Errorf("Expected %d values; got %d (%#v)", len(expected), len(res), res)
+		}
+		if res[0] != expected[0] || res[1] != expected[1] {
+			t.Errorf("Expected %#v; got %#v", expected, res)
+		}
+	})
+}
