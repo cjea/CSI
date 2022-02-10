@@ -1,53 +1,24 @@
 package exercise
 
-import "fmt"
+import (
+	"fmt"
+	"memtable/pkg/storage"
+)
 
-func Run(db DB) error {
-	if err := db.Put([]byte("key1"), []byte("val1")); err != nil {
-		return err
+func Run(db storage.DB) {
+	for i := 0; i < 26; i++ {
+		must(db.Put([]byte{byte(i + 97)}, []byte(fmt.Sprintf("val_%c", i+97))))
 	}
-	val, err := db.Get([]byte("key1"))
+	db.Print()
+	it, err := db.RangeScan([]byte("ba"), []byte("z"))
+	must(err)
+	for it.Next() {
+		fmt.Printf("Val: '%s'\n", string(it.Value()))
+	}
+}
+
+func must(err error) {
 	if err != nil {
-		return err
+		panic(err)
 	}
-	if string(val) != "val1" {
-		return fmt.Errorf("Expected 'val1'; got %s", val)
-	}
-	return nil
-}
-
-type DB interface {
-	// Get gets the value for the given key. It returns an error if the
-	// DB does not contain the key.
-	Get(key []byte) (value []byte, err error)
-
-	// Has returns true if the DB contains the given key.
-	Has(key []byte) (ret bool, err error)
-
-	// Put sets the value for the given key. It overwrites any previous value
-	// for that key; a DB is not a multi-map.
-	Put(key, value []byte) error
-
-	// Delete deletes the value for the given key.
-	Delete(key []byte) error
-
-	// RangeScan returns an Iterator (see below) for scanning through all
-	// key-value pairs in the given range, ordered by key ascending.
-	RangeScan(start, limit []byte) (Iterator, error)
-}
-
-type Iterator interface {
-	// Next moves the iterator to the next key/value pair.
-	// It returns false if the iterator is exhausted.
-	Next() bool
-
-	// Error returns any accumulated error. Exhausting all the key/value pairs
-	// is not considered to be an error.
-	Error() error
-
-	// Key returns the key of the current key/value pair, or nil if done.
-	Key() []byte
-
-	// Value returns the value of the current key/value pair, or nil if done.
-	Value() []byte
 }

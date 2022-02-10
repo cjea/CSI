@@ -3,7 +3,7 @@ package skiplist
 import (
 	"fmt"
 	"memtable/pkg/coinflip"
-	"memtable/pkg/exercise"
+	"memtable/pkg/storage"
 )
 
 var (
@@ -11,28 +11,45 @@ var (
 	ErrKeyNotFound = fmt.Errorf("key not found")
 )
 
-func (s *Skiplist) EnsureRootLevelParent(n *Node) *Node {
-	for n.Prev != nil {
-		n = n.Prev
-	}
-	if n.Parent != nil {
-		return n.Parent
-	}
+// func (s *Skiplist) LevelRoot(n *Node) *Node {
+// 	for n.Prev != nil {
+// 		n = n.Prev
+// 	}
+// 	return n
+// }
+
+func (s *Skiplist) AddLevel() {
 	newRoot := MinNode()
-	newRoot.Child = s.root
-	s.root.Parent = newRoot
+	old := s.Root()
+	newRoot.Child = old
+	old.Parent = newRoot
 	s.root = newRoot
-	return newRoot
 }
 
+// func (s *Skiplist) EnsureLevelAbove(n *Node) *Node {
+// 	r := s.LevelRoot(n)
+// 	if r.Parent != nil {
+// 		return r.Parent
+// 	}
+// 	// When the level's root does not have a parent, it must be the global root.
+// 	newRoot := MinNode()
+// 	newRoot.Child = s.root
+// 	s.root.Parent = newRoot
+// 	s.root = newRoot
+// 	return newRoot
+// }
+
 func (s *Skiplist) Lift(n *Node) *Node {
-	s.EnsureRootLevelParent(n)
+	// s.EnsureLevelAbove(n)
 	if n.Parent != nil {
 		return n.Parent
 	}
 
 	tmp := n
-	for ; tmp.Parent == nil; tmp = tmp.Prev {
+	for ; tmp != nil && tmp.Parent == nil; tmp = tmp.Prev {
+	}
+	if tmp == nil {
+		return nil
 	}
 	parent := NewNode(n.Key.Raw, nil)
 	n.Parent = parent
@@ -163,7 +180,7 @@ func (s *Skiplist) delete(key Key) error {
 	return nil
 }
 
-func (s *Skiplist) RangeScan(start, limit []byte) (exercise.Iterator, error) {
+func (s *Skiplist) RangeScan(start, limit []byte) (storage.Iterator, error) {
 	if lt(limit, start) {
 		return nil, fmt.Errorf(
 			"range invalid: start of range must be less than or equal to limit (start=%v, limit=%v",
@@ -185,8 +202,12 @@ func (s *Skiplist) RangeScan(start, limit []byte) (exercise.Iterator, error) {
 }
 
 func New() *Skiplist {
-	ret := &Skiplist{}
-	ret.Root()
+	ret := &Skiplist{
+		root: MinNode(),
+	}
+	for i := 0; i < MAX_LEVEL; i++ {
+		ret.AddLevel()
+	}
 	return ret
 }
 

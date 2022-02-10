@@ -157,38 +157,13 @@ func TestScanLevel(t *testing.T) {
 }
 
 func TestLift(t *testing.T) {
-	t.Run("lifting root", func(t *testing.T) {
-		l := New()
-		root1 := l.Root()
-		l.Lift(root1)
-		root2 := l.Root()
-		l.Lift(root2)
-		if l.Root().Child != root2 {
-			t.Errorf("expected root child to be %+v; got %+v", root2, l.Root().Child)
-		}
-		if l.Root().Child.Child != root1 {
-			t.Errorf("expected root grandchild to be %+v; got %+v", root1, l.Root().Child.Child)
-		}
-		if l.Root() != root2.Parent {
-			t.Errorf("expected root2 to have parent %+v; got %+v", l.Root(), root2.Parent)
-		}
-		if l.Root() != root1.Parent.Parent {
-			t.Errorf("expected root1 to have grandparent %+v; got %+v", l.Root(), root1.Parent.Parent)
-		}
-	})
-
-	t.Run("lifting non-root element", func(t *testing.T) {
+	t.Run("lifting an element", func(t *testing.T) {
 		l := New()
 		a0 := NewNode([]byte{1}, nil)
-		originalRoot := l.Root()
-		l.Root().Append(a0)
+		l.Root().Child.Append(a0)
 		l.Lift(a0)
-		newRoot := l.Root()
-		if originalRoot.Parent != newRoot {
-			t.Errorf("expected original root to have parent %+v; got %+v", newRoot, originalRoot.Parent)
-		}
-		if newRoot.Child != originalRoot {
-			t.Errorf("expected new root to have child %+v; got %+v", originalRoot, newRoot.Child)
+		if l.Root().Next != a0.Parent {
+			t.Errorf("expected index to be lifted %p; got %+v", a0.Parent, l.Root())
 		}
 	})
 }
