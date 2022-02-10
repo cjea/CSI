@@ -37,3 +37,32 @@ BenchmarkGet4k-8          866635              1502 ns/op
 BenchmarkGet8k-8          705526              1495 ns/op
 BenchmarkGet16k-8         591199              2378 ns/op
 ```
+Retrieving 1 random element from various-sized skiplists (MAX_LEVEL=64, 1/4 chance of leveling):
+```
+goos: darwin
+goarch: amd64
+pkg: memtable/pkg/skiplist
+BenchmarkGet4k-8          720403              1514 ns/op
+BenchmarkGet8k-8          655772              2098 ns/op
+BenchmarkGet16k-8         431062              2714 ns/op
+```
+
+Retrieving 1 random element from various-sized skiplists (MAX_LEVEL=64, 1/8 chance of leveling):
+```
+goos: darwin
+goarch: amd64
+pkg: memtable/pkg/skiplist
+BenchmarkGet4k-8          704035              1717 ns/op
+BenchmarkGet8k-8          627524              1810 ns/op
+BenchmarkGet16k-8         514645              2549 ns/op
+```
+Retrieving 1 random element from various-sized skiplists (MAX_LEVEL=16, 1/8 chance of leveling):
+```
+goos: darwin
+goarch: amd64
+pkg: memtable/pkg/skiplist
+BenchmarkGet4k-8          976483              1611 ns/op
+BenchmarkGet8k-8          773652              1444 ns/op
+BenchmarkGet16k-8         543621              2253 ns/op
+
+```
