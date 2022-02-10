@@ -6,9 +6,9 @@ import (
 )
 
 func init() {
-	rand.Seed(time.Now().UTC().Unix())
+	rand.Seed(time.Now().UnixNano())
 }
 
 func Flip() bool {
-	return rand.Intn(2) == 0
+	return rand.Intn(4) == 0
 }

@@ -11,13 +11,6 @@ var (
 	ErrKeyNotFound = fmt.Errorf("key not found")
 )
 
-// func (s *Skiplist) LevelRoot(n *Node) *Node {
-// 	for n.Prev != nil {
-// 		n = n.Prev
-// 	}
-// 	return n
-// }
-
 func (s *Skiplist) AddLevel() {
 	newRoot := MinNode()
 	old := s.Root()
@@ -26,21 +19,7 @@ func (s *Skiplist) AddLevel() {
 	s.root = newRoot
 }
 
-// func (s *Skiplist) EnsureLevelAbove(n *Node) *Node {
-// 	r := s.LevelRoot(n)
-// 	if r.Parent != nil {
-// 		return r.Parent
-// 	}
-// 	// When the level's root does not have a parent, it must be the global root.
-// 	newRoot := MinNode()
-// 	newRoot.Child = s.root
-// 	s.root.Parent = newRoot
-// 	s.root = newRoot
-// 	return newRoot
-// }
-
 func (s *Skiplist) Lift(n *Node) *Node {
-	// s.EnsureLevelAbove(n)
 	if n.Parent != nil {
 		return n.Parent
 	}

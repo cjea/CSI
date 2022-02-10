@@ -2,7 +2,9 @@ package skiplist
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
+	"time"
 )
 
 func TestLte(t *testing.T) {
@@ -268,6 +270,16 @@ func TestRangeScan(t *testing.T) {
 	})
 }
 
+func preGenRandomKeys(prefix string, amount, low, high int) []string {
+	rand.Seed(time.Now().UnixNano())
+	ret := make([]string, amount)
+	for i := 0; i < amount; i++ {
+		r := rand.Intn(high)
+		ret[i] = prefix + fmt.Sprint(r)
+	}
+	return ret
+}
+
 func seed(n int) *Skiplist {
 	l := New()
 	for i := 0; i < n; i++ {
@@ -318,30 +330,32 @@ func BenchmarkPut16k(b *testing.B) {
 	}
 }
 
+var keys = preGenRandomKeys("key-", 1<<10, 1, 1<<14)
+
 func BenchmarkGet4k(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := seededList4k.Get([]byte("key-999"))
-		if err == ErrKeyNotFound {
-			continue
-		}
+		b.StopTimer()
+		k := []byte(keys[i%len(keys)])
+		b.StartTimer()
+		_, _ = seededList4k.Get(k)
 	}
 }
 func BenchmarkGet8k(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := seededList8k.Get([]byte("key-999"))
-		if err == ErrKeyNotFound {
-			continue
-		}
+		b.StopTimer()
+		k := []byte(keys[i%len(keys)])
+		b.StartTimer()
+		_, _ = seededList8k.Get(k)
 	}
 }
 func BenchmarkGet16k(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := seededList16k.Get([]byte("key-999"))
-		if err == ErrKeyNotFound {
-			continue
-		}
+		b.StopTimer()
+		k := []byte(keys[i%len(keys)])
+		b.StartTimer()
+		_, _ = seededList16k.Get(k)
 	}
 }
