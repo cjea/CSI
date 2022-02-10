@@ -1,8 +1,8 @@
 package skiplist
 
 var (
-	GLOBAL_MIN_KEY = []byte{0, 0}
-	MIN_KEY        = Key{key: GLOBAL_MIN_KEY, Raw: GLOBAL_MIN_KEY}
+	MIN_KEY_RAW = []byte{0, 0}
+	MIN_KEY     = Key{key: MIN_KEY_RAW, Raw: MIN_KEY_RAW}
 )
 
 type Node struct {

@@ -10,5 +10,5 @@ func init() {
 }
 
 func Flip() bool {
-	return rand.Intn(4) == 0
+	return rand.Intn(5) == 0
 }

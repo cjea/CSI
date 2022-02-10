@@ -292,6 +292,7 @@ func seed(n int) *Skiplist {
 var seededList4k = seed(1 << 12)
 var seededList8k = seed(1 << 13)
 var seededList16k = seed(1 << 14)
+var seededList32k = seed(1 << 15)
 
 func BenchmarkPut1k(b *testing.B) {
 	l := seed(1 << 10)
@@ -357,5 +358,15 @@ func BenchmarkGet16k(b *testing.B) {
 		k := []byte(keys[i%len(keys)])
 		b.StartTimer()
 		_, _ = seededList16k.Get(k)
+	}
+}
+
+func BenchmarkGet32k(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		k := []byte(keys[i%len(keys)])
+		b.StartTimer()
+		_, _ = seededList32k.Get(k)
 	}
 }
