@@ -292,3 +292,75 @@ func TestRangeScan(t *testing.T) {
 		}
 	})
 }
+
+func seed(n int) *Skiplist {
+	l := New()
+	for i := 0; i < n; i++ {
+		str := fmt.Sprint(i)
+		l.Put([]byte("key-"+str), []byte("val-"+str))
+	}
+	return l
+}
+
+var seededList4k = seed(1 << 12)
+var seededList8k = seed(1 << 13)
+var seededList16k = seed(1 << 14)
+
+func BenchmarkPut1k(b *testing.B) {
+	l := seed(1 << 10)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		l.Put([]byte("key-benchtest"), []byte{9, 10, 11, 12})
+	}
+}
+func BenchmarkPut2k(b *testing.B) {
+	l := seed(1 << 11)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		l.Put([]byte("key-benchtest"), []byte{9, 10, 11, 12})
+	}
+}
+func BenchmarkPut4k(b *testing.B) {
+	l := seed(1 << 12)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		l.Put([]byte("key-benchtest"), []byte{9, 10, 11, 12})
+	}
+}
+func BenchmarkPut8k(b *testing.B) {
+	l := seed(1 << 13)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		l.Put([]byte("key-benchtest"), []byte{9, 10, 11, 12})
+	}
+}
+
+func BenchmarkPut16k(b *testing.B) {
+	l := seed(1 << 14)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		l.Put([]byte("key-benchtest"), []byte{9, 10, 11, 12})
+	}
+}
+
+func BenchmarkGet4k(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := seededList4k.Get([]byte("key-" + fmt.Sprint(i%(1<<8))))
+		must(err)
+	}
+}
+func BenchmarkGet8k(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := seededList8k.Get([]byte("key-" + fmt.Sprint(i%(1<<8))))
+		must(err)
+	}
+}
+func BenchmarkGet16k(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := seededList16k.Get([]byte("key-" + fmt.Sprint(i%(1<<8))))
+		must(err)
+	}
+}

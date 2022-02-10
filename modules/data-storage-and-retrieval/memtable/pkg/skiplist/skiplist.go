@@ -7,6 +7,7 @@ import (
 )
 
 var (
+	MAX_LEVEL      = 16
 	ErrKeyNotFound = fmt.Errorf("key not found")
 )
 
@@ -121,11 +122,24 @@ func (s *Skiplist) put(key Key, value []byte) error {
 	} else {
 		newNode := NewNode(key.Raw, value)
 		n.Append(newNode)
-		for coinflip.Flip() {
+		lvl := RandomHeight()
+		if lvl == 0 {
+			return nil
+		}
+
+		for i := 0; i < lvl; i++ {
 			newNode = s.Lift(newNode)
 		}
 	}
 	return nil
+}
+
+func RandomHeight() int {
+	lvl := 0
+	for coinflip.Flip() && lvl < MAX_LEVEL {
+		lvl++
+	}
+	return lvl
 }
 
 func (s *Skiplist) Delete(key []byte) error {
