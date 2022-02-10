@@ -192,3 +192,43 @@ func TestLift(t *testing.T) {
 		}
 	})
 }
+
+func TestGet(t *testing.T) {
+	l := New()
+	for i := 0; i < 50; i++ {
+		l.Put([]byte{byte(i)}, []byte(fmt.Sprintf("val_%d", i)))
+	}
+	table := []struct {
+		key  []byte
+		want string
+		err  error
+	}{
+		{key: []byte{byte(0)}, want: "val_0", err: nil},
+		{key: []byte{byte(20)}, want: "val_20", err: nil},
+		{key: []byte{byte(42)}, want: "val_42", err: nil},
+		{key: []byte{byte(51)}, want: "", err: ErrKeyNotFound},
+	}
+	for i, test := range table {
+		name := fmt.Sprintf("test-%d", i)
+		t.Run(name, func(t *testing.T) {
+			val, err := l.Get(test.key)
+			if err != test.err || string(val) != test.want {
+				t.Errorf(
+					"Get(%v) should equal %v (err: %v); got %v (err %v)",
+					test.key, test.want, test.err, string(val), err,
+				)
+			}
+		})
+	}
+}
+func TestDelete(t *testing.T) {
+	l := New()
+	for i := 0; i < 50; i++ {
+		l.Put([]byte{byte(i)}, []byte(fmt.Sprintf("val_%d", i)))
+	}
+	k := []byte{(byte(42))}
+	l.Delete(k)
+	if ok, _ := l.Has(k); ok {
+		t.Errorf("Key %v should have been deleted but it was found", k)
+	}
+}

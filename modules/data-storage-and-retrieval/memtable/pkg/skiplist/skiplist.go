@@ -2,6 +2,7 @@ package skiplist
 
 import (
 	"fmt"
+	"memtable/pkg/coinflip"
 	"memtable/pkg/exercise"
 )
 
@@ -118,17 +119,13 @@ func (s *Skiplist) put(key Key, value []byte) error {
 	if n.Key.Eq(key) {
 		n.Val = value
 	} else {
-		n.Append(NewNode(key.Raw, value))
+		newNode := NewNode(key.Raw, value)
+		n.Append(newNode)
+		for coinflip.Flip() {
+			newNode = s.Lift(newNode)
+		}
 	}
-	// TODO: traverse up levels and insert skip-nodes.
-	//       Maybe have #Scan return a list access-path nodes from each level.
-	//
-	//    While bubble
-	//      child = D, L = L + 1
-	//      D' = (key, child=D); insert D' in Level[L++]
-	//      child = D'
-	//
-	panic("Skiplist#Put is not implemented")
+	return nil
 }
 
 func (s *Skiplist) Delete(key []byte) error {
@@ -138,6 +135,16 @@ func (s *Skiplist) delete(key Key) error {
 	n := s.Scan(key)
 	if n.Key.Eq(key) {
 		n.Prev.Next = n.Next
+		if !n.IsLast() {
+			n.Next.Prev = n.Prev
+		}
+		for n.Parent != nil {
+			n = n.Parent
+			n.Prev.Next = n.Next
+			if !n.IsLast() {
+				n.Next.Prev = n.Prev
+			}
+		}
 	}
 	return nil
 }
