@@ -2,6 +2,7 @@ package skiplist
 
 type Key struct {
 	key []byte
+	Raw []byte
 }
 
 func (k Key) Eq(k2 Key) bool {
@@ -26,5 +27,5 @@ func NewKey(b []byte) Key {
 	for i := 0; i < len(b); i++ {
 		ret[i+1] = b[i]
 	}
-	return Key{key: ret}
+	return Key{key: ret, Raw: b}
 }

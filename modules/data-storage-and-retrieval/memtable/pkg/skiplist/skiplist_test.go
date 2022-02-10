@@ -76,7 +76,7 @@ func TestNodeAppend(t *testing.T) {
 		n2 := &Node{Next: nil}
 		n1 := &Node{Next: n2}
 		n2.Prev = n1
-		app := NewNode(NewKey(nil), nil)
+		app := NewNode(nil, nil)
 
 		n1.Append(app)
 		if n1.Next != app {
@@ -96,7 +96,7 @@ func TestNodeAppend(t *testing.T) {
 		n2 := &Node{Next: nil}
 		n1 := &Node{Next: n2}
 		n2.Prev = n1
-		app := NewNode(NewKey(nil), nil)
+		app := NewNode(nil, nil)
 
 		n2.Append(app)
 		if n1.Next != n2 {
@@ -122,14 +122,14 @@ func TestScanLevel(t *testing.T) {
 			t.Fatal(err)
 		}
 		if n.Key.key[0] != 0 {
-			t.Errorf("expected to find first node of (empty) level; got %v", n)
+			t.Errorf("expected to find first node of (empty) level; got %+v", n)
 		}
 	})
 
 	t.Run("scanning level with strictly lower values than target", func(t *testing.T) {
-		term := NewNode(NewKey([]byte{2}), nil)
+		term := NewNode([]byte{2}, nil)
 		l := New()
-		l.Root().Append(NewNode(NewKey([]byte{2}), nil)).Append(term)
+		l.Root().Append(NewNode([]byte{2}, nil)).Append(term)
 		n, err := l.ScanLevel(l.Root(), NewKey([]byte{3}))
 		if err != nil {
 			t.Fatal(err)
@@ -140,8 +140,8 @@ func TestScanLevel(t *testing.T) {
 	})
 
 	t.Run("scanning level with higher and lower values than target", func(t *testing.T) {
-		mid := NewNode(NewKey([]byte{1}), nil)
-		term := NewNode(NewKey([]byte{3}), nil)
+		mid := NewNode([]byte{1}, nil)
+		term := NewNode([]byte{3}, nil)
 		l := New()
 		l.Root().Append(mid).Append(term)
 		n, err := l.ScanLevel(l.Root(), NewKey([]byte{2}))
@@ -179,7 +179,7 @@ func TestLift(t *testing.T) {
 
 	t.Run("lifting non-root element", func(t *testing.T) {
 		l := New()
-		a0 := NewNode(NewKey([]byte{1}), nil)
+		a0 := NewNode([]byte{1}, nil)
 		originalRoot := l.Root()
 		l.Root().Append(a0)
 		l.Lift(a0)

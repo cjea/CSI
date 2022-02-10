@@ -1,5 +1,10 @@
 package skiplist
 
+var (
+	GLOBAL_MIN_KEY = []byte{0, 0}
+	MIN_KEY        = Key{key: GLOBAL_MIN_KEY, Raw: GLOBAL_MIN_KEY}
+)
+
 type Node struct {
 	Prev, Next, Child, Parent *Node
 	Key                       Key
@@ -27,20 +32,22 @@ func (n *Node) Append(n2 *Node) *Node {
 	return n2
 }
 
-func NewNode(key Key, value []byte) *Node {
+func NewNode(key []byte, value []byte) *Node {
 	return &Node{
 		Prev:  nil,
 		Next:  nil,
 		Child: nil,
-		Key:   key,
+		Key:   NewKey(key),
 		Val:   value,
 	}
 }
 
 func NewRootNode() *Node {
-	return NewNode(Key{key: GLOBAL_MIN_KEY}, nil)
+	return MinNode()
 }
 
 func MinNode() *Node {
-	return NewNode(Key{key: GLOBAL_MIN_KEY}, nil)
+	n := NewNode(nil, nil)
+	n.Key = MIN_KEY
+	return n
 }

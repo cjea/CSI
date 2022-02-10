@@ -6,10 +6,6 @@ import (
 )
 
 var (
-	GLOBAL_MIN_KEY = []byte{0, 0}
-)
-
-var (
 	ErrKeyNotFound = fmt.Errorf("key not found")
 )
 
@@ -36,7 +32,7 @@ func (s *Skiplist) Lift(n *Node) *Node {
 	tmp := n
 	for ; tmp.Parent == nil; tmp = tmp.Prev {
 	}
-	parent := NewNode(n.Key, nil)
+	parent := NewNode(n.Key.Raw, nil)
 	n.Parent = parent
 	parent.Child = n
 	tmp.Parent.Append(parent)
@@ -122,7 +118,7 @@ func (s *Skiplist) put(key Key, value []byte) error {
 	if n.Key.Eq(key) {
 		n.Val = value
 	} else {
-		n.Append(NewNode(key, value))
+		n.Append(NewNode(key.Raw, value))
 	}
 	// TODO: traverse up levels and insert skip-nodes.
 	//       Maybe have #Scan return a list access-path nodes from each level.
