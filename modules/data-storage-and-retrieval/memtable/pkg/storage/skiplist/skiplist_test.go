@@ -321,21 +321,27 @@ func BenchmarkPut16k(b *testing.B) {
 func BenchmarkGet4k(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := seededList4k.Get([]byte("key-" + fmt.Sprint(i%(1<<8))))
-		must(err)
+		_, err := seededList4k.Get([]byte("key-999"))
+		if err == ErrKeyNotFound {
+			continue
+		}
 	}
 }
 func BenchmarkGet8k(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := seededList8k.Get([]byte("key-" + fmt.Sprint(i%(1<<8))))
-		must(err)
+		_, err := seededList8k.Get([]byte("key-999"))
+		if err == ErrKeyNotFound {
+			continue
+		}
 	}
 }
 func BenchmarkGet16k(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := seededList16k.Get([]byte("key-" + fmt.Sprint(i%(1<<8))))
-		must(err)
+		_, err := seededList16k.Get([]byte("key-999"))
+		if err == ErrKeyNotFound {
+			continue
+		}
 	}
 }
