@@ -163,7 +163,10 @@ func TestLift(t *testing.T) {
 		l := New()
 		a0 := NewNode([]byte{1}, nil)
 		l.Root().Child.Append(a0)
-		l.Lift(a0)
+		lifted := l.Lift(a0)
+		if lifted != a0.Parent || lifted.Child != a0 {
+			t.Errorf("expected lifted %v to have correct child; got %+v", lifted, a0)
+		}
 		if l.Root().Next != a0.Parent {
 			t.Errorf("expected index to be lifted %p; got %+v", a0.Parent, l.Root())
 		}

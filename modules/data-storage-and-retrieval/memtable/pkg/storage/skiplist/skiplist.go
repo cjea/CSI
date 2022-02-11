@@ -35,7 +35,7 @@ func (s *Skiplist) Lift(n *Node) *Node {
 	n.Parent = parent
 	parent.Child = n
 	tmp.Parent.Append(parent)
-	return tmp.Parent
+	return parent
 }
 
 type Skiplist struct {

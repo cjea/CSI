@@ -5,9 +5,9 @@ goos: darwin
 goarch: amd64
 pkg: memtable/pkg/skiplist
 cpu: Intel(R) Core(TM) i7-4870HQ CPU @ 2.50GHz
-BenchmarkPut4k-8         2823948               425.5 ns/op
-BenchmarkPut8k-8         2938836               495.7 ns/op
-BenchmarkPut16k-8        2402826               554.4 ns/op
+BenchmarkPut4k-8         2506168               407.7 ns/op
+BenchmarkPut8k-8         3239389               437.2 ns/op
+BenchmarkPut16k-8        3282692               386.1 ns/op
 
 ```
 
