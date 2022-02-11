@@ -1,7 +1,6 @@
 package skiplist
 
 import (
-	"bytes"
 	"fmt"
 	"memtable/pkg/coinflip"
 	"memtable/pkg/storage"
@@ -64,13 +63,17 @@ func (s *Skiplist) Root() *Node {
 	return s.root
 }
 
+// ScanLevel returns the maximum node such that n <= node <= key.
 func (s *Skiplist) ScanLevel(n *Node, key Key) (*Node, error) {
-	if !lte(n.Key.key, key.key) {
-		return nil, fmt.Errorf("invariant: level scan must start with key less than target key")
+	if !n.Key.Lte(key) {
+		return nil, fmt.Errorf(
+			"invariant: level scan must start with key less than target key; node=%v, key=%v",
+			n, key,
+		)
 	}
 
 	cur := n
-	for ; lte(cur.Key.key, key.key); cur = cur.Next {
+	for ; cur.Key.Lte(key); cur = cur.Next {
 		if cur.IsLast() {
 			return cur, nil
 		}
@@ -161,16 +164,16 @@ func (s *Skiplist) delete(key Key) error {
 }
 
 func (s *Skiplist) RangeScan(start, limit []byte) (storage.Iterator, error) {
-	if lt(limit, start) {
+	startKey := NewKey(start)
+	endKey := NewKey(limit)
+	if endKey.Lt(startKey) {
 		return nil, fmt.Errorf(
-			"range invalid: start of range must be less than or equal to limit (start=%v, limit=%v",
+			"range invalid: start of range must be less than or equal to limit (start=%v, limit=%v)",
 			start, limit,
 		)
 	}
-	startKey := NewKey(start)
-	endKey := NewKey(limit)
-	n := s.Scan(NewKey(start))
-	for n != nil && lt(n.Key.key, startKey.key) {
+	n := s.Scan(startKey)
+	for n != nil && n.Key.Lt(startKey) {
 		n = n.Next
 	}
 	return &Iterator{
@@ -208,11 +211,7 @@ func (i *Iterator) Next() bool {
 }
 
 func (i *Iterator) Done() bool {
-	keyTooHigh := false
-	if i.onDeck != nil {
-		keyTooHigh = !lt(i.onDeck.Key.key, i.end.key)
-	}
-	return i.Error() != nil || keyTooHigh || i.onDeck == nil
+	return i.Error() != nil || i.onDeck == nil || !i.onDeck.Key.Lt(i.end)
 }
 
 func (i *Iterator) Error() error {
@@ -225,14 +224,6 @@ func (i *Iterator) Key() []byte {
 
 func (i *Iterator) Value() []byte {
 	return i.Current.Val
-}
-
-func lte(b1, b2 []byte) bool {
-	return bytes.Compare(b1, b2) < 1
-}
-
-func lt(b1, b2 []byte) bool {
-	return bytes.Compare(b1, b2) < 0
 }
 
 func must(err error) {

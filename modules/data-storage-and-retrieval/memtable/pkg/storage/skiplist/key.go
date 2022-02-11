@@ -1,22 +1,25 @@
 package skiplist
 
+import "bytes"
+
 type Key struct {
 	key []byte
 	Raw []byte
 }
 
 func (k Key) Eq(k2 Key) bool {
-	b1 := k.key
-	b2 := k2.key
-	if len(b1) != len(b2) {
-		return false
-	}
-	for i := range b1 {
-		if b1[i] != b2[i] {
-			return false
-		}
-	}
-	return true
+	cmp := bytes.Compare(k.key, k2.key)
+	return cmp == 0
+}
+
+func (k Key) Lt(k2 Key) bool {
+	cmp := bytes.Compare(k.key, k2.key)
+	return cmp == -1
+}
+
+func (k Key) Lte(k2 Key) bool {
+	cmp := bytes.Compare(k.key, k2.key)
+	return cmp == 0 || cmp == -1
 }
 
 // Prepend a sentinel value to the input key, to ensure that all linked lists

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func TestLte(t *testing.T) {
+func TestKeyLte(t *testing.T) {
 	table := []struct {
 		b1, b2 []byte
 		want   bool
@@ -23,8 +23,10 @@ func TestLte(t *testing.T) {
 	for i, test := range table {
 		name := fmt.Sprintf("test-%d", i)
 		t.Run(name, func(t *testing.T) {
-			if actual := lte(test.b1, test.b2); actual != test.want {
-				t.Errorf("lte(%v, %v) = %v; got %v", test.b1, test.b2, test.want, actual)
+			k1 := NewKey(test.b1)
+			k2 := NewKey(test.b2)
+			if actual := k1.Lte(k2); actual != test.want {
+				t.Errorf("%v.Lte(%v) = %v; got %v", test.b1, test.b2, test.want, actual)
 			}
 		})
 	}
