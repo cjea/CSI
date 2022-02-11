@@ -211,8 +211,6 @@ func (i *Iterator) Done() bool {
 	keyTooHigh := false
 	if i.onDeck != nil {
 		keyTooHigh = !lt(i.onDeck.Key.key, i.end.key)
-		if keyTooHigh {
-		}
 	}
 	return i.Error() != nil || keyTooHigh || i.onDeck == nil
 }
