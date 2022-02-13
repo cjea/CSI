@@ -1,12 +1,12 @@
 package main
 
 import (
-	"memtable/pkg/exercise"
-	"memtable/pkg/storage/skiplist"
+	"memtable/pkg/storage/sstable"
 )
 
 func main() {
-	exercise.Run(skiplist.New())
+	// exercise.Run(skiplist.New())
+	sstable.Foo()
 }
 
 func must(err error) {

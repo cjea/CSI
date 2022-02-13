@@ -111,6 +111,7 @@ func (s *Skiplist) has(key Key) (ret bool, err error) {
 	return n.Key.Eq(key), nil
 }
 
+// TODO: limit the key and value to the size allowed by SSTable.
 func (s *Skiplist) Put(key, value []byte) error {
 	return s.put(NewKey(key), value)
 }
