@@ -32,6 +32,11 @@ func TestNew(t *testing.T) {
 			err:     ErrMissingDbMagicNum,
 		},
 		{
+			data:    []byte{0xDB, 0xFF, 0xDB},
+			numKeys: 1,
+			err:     ErrMissingDbMagicNum,
+		},
+		{
 			data:    []byte{0xDB, 0xDB, 0xDB, 0, 1, 0},
 			numKeys: 1,
 			err:     ErrMissingNumKeys,
