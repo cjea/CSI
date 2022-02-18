@@ -39,7 +39,7 @@ import (
 	Format of database:
 	===================
 	- Magic number: 3 bytes
-	- Num keys: 8 bytes
+	- Num keys: 4 bytes
 	 __________________________________________________________
 	|                   |          |               |          |
 	| MAGIC_FILE_NUMBER | NUM_KEYS | KEY_INDEX ... | ENTRy... |
@@ -59,32 +59,81 @@ const (
 	MAGIC_NUM_ENTRY = 0xEAC4AB
 )
 
-type SSTable struct {
+var (
+	ErrMissingNumKeys    = fmt.Errorf("corrputed: expected numKeys")
+	ErrMissingDbMagicNum = fmt.Errorf("corrupted: expected MAGIC_NUM_TABLE")
+)
+
+type SSTableParser struct {
+	Pos     uint64
 	Data    []byte
-	NumKeys uint64
+	NumKeys uint32
 }
 
-func validateTable(data []byte) error {
-	start := *(*int)(unsafe.Pointer(&data[0]))
-	if start != MAGIC_NUM_TABLE {
-		return fmt.Errorf("corrupted data: expected MAGIC_NUM_TABLE")
+func (s *SSTableParser) Read(p []byte) (n int, err error) {
+	outIdx := 0
+	offset := int(s.Pos)
+	remaining := min(len(s.Data)-offset, len(p))
+	for ; outIdx < remaining; outIdx++ {
+		p[outIdx] = s.Data[outIdx+offset]
+	}
+	s.Pos = uint64(outIdx + offset)
+	return outIdx, nil
+}
+
+func (s *SSTableParser) ParseMagicNumTable() error {
+	out := make([]byte, 3)
+	n, err := s.Read(out)
+	if n != 3 || err != nil {
+		return ErrMissingDbMagicNum
+	}
+
+	if !everyEl(out, 0xDB) {
+		return ErrMissingDbMagicNum
 	}
 	return nil
 }
 
-func New(data []byte) (*SSTable, error) {
-	if err := validateTable(data); err != nil {
+func (s *SSTableParser) ParseNumKeys() error {
+	out := make([]byte, 4)
+	n, err := s.Read(out)
+	if n != 4 || err != nil {
+		return ErrMissingNumKeys
+	}
+	s.NumKeys = *(*uint32)(unsafe.Pointer(&out[0]))
+	return nil
+}
+
+func NewParser(data []byte) (*SSTableParser, error) {
+	ret := &SSTableParser{Data: data, Pos: 0}
+	if err := ret.ParseMagicNumTable(); err != nil {
 		return nil, err
 	}
-	numKeys := *(*uint64)(unsafe.Pointer(&data[3]))
-	return &SSTable{
-		Data:    data,
-		NumKeys: numKeys,
-	}, nil
+	if err := ret.ParseNumKeys(); err != nil {
+		return nil, err
+	}
+	return ret, nil
 }
 
 func Foo() {
-	x := []byte{0xDB, 0xDB, 0xDB}
-	err := validateTable(x)
-	fmt.Printf("Err: %v\n", err)
+	// x := []byte{0xDB, 0xDB, 0xDB}
+	// err := validateTable(x)
+	// fmt.Printf("Err: %v\n", err)
+	panic("Foo not implemented :)")
+}
+
+func everyEl(bs []byte, b byte) bool {
+	for _, el := range bs {
+		if el != b {
+			return false
+		}
+	}
+	return true
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
