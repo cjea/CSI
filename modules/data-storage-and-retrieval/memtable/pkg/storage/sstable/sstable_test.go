@@ -53,8 +53,8 @@ func TestNew(t *testing.T) {
 			if err != nil {
 				return
 			}
-			if res.NumKeys != tt.numKeys {
-				t.Errorf("expected numKeys %v; got %v", tt.numKeys, res.NumKeys)
+			if res.NumKeyIdxs != tt.numKeys {
+				t.Errorf("expected numKeys %v; got %v", tt.numKeys, res.NumKeyIdxs)
 			}
 		})
 	}

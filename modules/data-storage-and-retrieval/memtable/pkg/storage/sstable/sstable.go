@@ -41,10 +41,10 @@ import (
   Format of database:
   ===================
   - Magic number: 3 bytes
-  - Num keys: 4 bytes
+  - Num key indices: 4 bytes
    __________________________________________________________
   |                   |          |               |          |
-  | MAGIC_FILE_NUMBER | NUM_KEYS | KEY_INDEX ... | ENTRy... |
+  | MAGIC_FILE_NUMBER | NUM_IDXS | KEY_INDEX ... | ENTRY... |
   |___________________|__________|__________________________|
 
   Finding an entry:
@@ -63,14 +63,21 @@ var (
 )
 
 var (
-	ErrMissingNumKeys    = fmt.Errorf("corrputed: expected numKeys")
-	ErrMissingDbMagicNum = fmt.Errorf("corrupted: expected MAGIC_NUM_TABLE")
+	ErrMissingNumKeys        = fmt.Errorf("corrputed: expected numKeys")
+	ErrMissingDbMagicNum     = fmt.Errorf("corrupted: expected MAGIC_NUM_TABLE")
+	ErrMissingKeyIdxMagicNum = fmt.Errorf("corrupted: expected MAGIC_NUM_KEY_IDX")
 )
 
+type KeyIdx struct {
+	KeyLenBytes int
+	Key         []byte
+	Offset      int
+}
+
 type SSTableParser struct {
-	Pos     uint64
-	Data    []byte
-	NumKeys uint32
+	Pos        uint64
+	Data       []byte
+	NumKeyIdxs uint32
 }
 
 func (s *SSTableParser) Read(p []byte) (n int, err error) {
@@ -84,27 +91,37 @@ func (s *SSTableParser) Read(p []byte) (n int, err error) {
 	return outIdx, nil
 }
 
-func (s *SSTableParser) ParseMagicNumTable() error {
-	out := make([]byte, 3)
-	n, err := s.Read(out)
-	if n != 3 || err != nil {
-		return ErrMissingDbMagicNum
-	}
+func (s *SSTableParser) ParseMagicNum(magic []byte) bool {
+	length := len(magic)
+	out := make([]byte, length)
+	s.Read(out)
 
-	if bytes.Compare(out, MAGIC_NUM_TABLE) != 0 {
-		return ErrMissingDbMagicNum
-	}
-	return nil
+	return bytes.Compare(out, magic) == 0
 }
 
-func (s *SSTableParser) ParseNumKeys() error {
+func (s *SSTableParser) ParseMagicNumTable() error {
+	if s.ParseMagicNum(MAGIC_NUM_TABLE) {
+		return nil
+	}
+	return ErrMissingDbMagicNum
+}
+
+func (s *SSTableParser) ParseNumKeyIdxs() error {
 	out := make([]byte, 4)
 	n, err := s.Read(out)
 	if n != 4 || err != nil {
 		return ErrMissingNumKeys
 	}
-	s.NumKeys = *(*uint32)(unsafe.Pointer(&out[0]))
+	s.NumKeyIdxs = *(*uint32)(unsafe.Pointer(&out[0]))
 	return nil
+}
+
+func (s *SSTableParser) ParseKeyIdx() (*KeyIdx, error) {
+	if !s.ParseMagicNum(MAGIC_NUM_KEY_IDX) {
+		return nil, ErrMissingKeyIdxMagicNum
+	}
+	// TODO: parse key length, key, and offset into *KeyIdx{}
+	return nil, nil
 }
 
 func NewParser(data []byte) (*SSTableParser, error) {
@@ -114,7 +131,7 @@ func NewParser(data []byte) (*SSTableParser, error) {
 		return nil, err
 	}
 
-	if err := ret.ParseNumKeys(); err != nil {
+	if err := ret.ParseNumKeyIdxs(); err != nil {
 		return nil, err
 	}
 
